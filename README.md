@@ -1,3 +1,8 @@
+# Patches
+- Removed hardcoded configuration files and locations.
+- Added parameters for configuration file location and handling.
+- More
+
 # Description
 
 AppDaemon is a loosely coupled, multi-threaded, sandboxed python
