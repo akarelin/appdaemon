@@ -402,13 +402,13 @@ class AppManagement:
 
         new_config = None
 
-        if await utils.run_in_executor(self, os.path.isfile, self.app_config_file):
-            self.logger.warning(
-                "apps.yaml in the Config directory is deprecated. Please move apps.yaml to the apps directory."
-            )
-            new_config = utils.run_in_executor(self.read_config_file, self.app_config_file)
-        else:
-            for root, subdirs, files in await utils.run_in_executor(self, os.walk, self.AD.app_dir):
+        # if await utils.run_in_executor(self, os.path.isfile, self.app_config_file):
+        #     self.logger.warning(
+        #         "apps.yaml in the Config directory is deprecated. Please move apps.yaml to the apps directory."
+        #     )
+        #     new_config = utils.run_in_executor(self.read_config_file, self.app_config_file)
+        # else:
+        for root, subdirs, files in await utils.run_in_executor(self, os.walk, self.AD.app_dir):
                 subdirs[:] = [d for d in subdirs if d not in self.AD.exclude_dirs and "." not in d]
                 if root[-11:] != "__pycache__" and root[0] != ".":
                     for file in files:

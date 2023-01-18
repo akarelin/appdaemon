@@ -119,6 +119,7 @@ class ADMain:
 
         """
 
+        print('\nrun\n')
         try:
 
             # if to use uvloop
@@ -131,6 +132,7 @@ class ADMain:
             # Initialize AppDaemon
 
             self.AD = ad.AppDaemon(self.logging, loop, **appdaemon)
+            print(self.AD)
 
             # Initialize Dashboard/API/admin
 
@@ -159,7 +161,10 @@ class ADMain:
             self.logger.debug("Start Main Loop")
 
             pending = asyncio.all_tasks(loop)
+            print(pending)
+            print(loop)
             loop.run_until_complete(asyncio.gather(*pending))
+
 
             #
             # Now we are shutting down - perform any necessary cleanup
@@ -190,24 +195,13 @@ class ADMain:
         self.init_signals()
 
         # Get command line args
-
         parser = argparse.ArgumentParser()
 
-        parser.add_argument(
-            "-c",
-            "--config",
-            help="full path to config directory",
-            type=str,
-            default=None,
-        )
+        parser.add_argument("--config",help="full path to AD config",type=str,default=None,)
+        parser.add_argument("--code",help="full path py files",type=str,default=None,)
+        parser.add_argument("--apps",help="full path to app yaml files",type=str,default=None,)
         parser.add_argument("-p", "--pidfile", help="full path to PID File", default=None)
-        parser.add_argument(
-            "-t",
-            "--timewarp",
-            help="speed that the scheduler will work at for time travel",
-            default=1,
-            type=float,
-        )
+        parser.add_argument("-t", "--timewarp", help="speed that the scheduler will work at for time travel", default=1, type=float, )
         parser.add_argument(
             "-s",
             "--starttime",
@@ -233,14 +227,19 @@ class ADMain:
         parser.add_argument("--profiledash", help=argparse.SUPPRESS, action="store_true")
 
         args = parser.parse_args()
+        print(args)
 
-        config_dir = args.config
+        config_file_yaml = args.config
+        app_dir = args.apps
+        code_dir = args.code
+        config_dir = os.path.dirname(config_file_yaml)
+
         pidfile = args.pidfile
 
-        if config_dir is None:
-            config_file_yaml = utils.find_path("appdaemon.yaml")
-        else:
-            config_file_yaml = os.path.join(config_dir, "appdaemon.yaml")
+        # if config_dir is None:
+        #     config_file_yaml = utils.find_path("appdaemon.yaml")
+        # else:
+        #     config_file_yaml = os.path.join(config_dir, "appdaemon.yaml")
 
         if config_file_yaml is None:
             print("FATAL: no configuration directory defined and defaults not present\n")
@@ -334,7 +333,7 @@ class ADMain:
 
         appdaemon["config_dir"] = config_dir
         appdaemon["config_file"] = config_file_yaml
-        appdaemon["app_config_file"] = os.path.join(os.path.dirname(config_file_yaml), "apps.yaml")
+        #appdaemon["app_config_file"] = os.path.join(os.path.dirname(config_file_yaml), "apps.yaml")
         appdaemon["module_debug"] = module_debug
 
         if args.starttime is not None:
@@ -348,10 +347,9 @@ class ADMain:
 
         appdaemon["loglevel"] = args.debug
 
-        appdaemon["config_dir"] = os.path.dirname(config_file_yaml)
-
         appdaemon["stop_function"] = self.stop
 
+        print(appdaemon)
         hadashboard = None
         if "hadashboard" in config:
             if config["hadashboard"] is None:
@@ -446,7 +444,11 @@ class ADMain:
         if exit is True:
             sys.exit(1)
 
+        print(config_file_yaml)
+
         utils.check_path("config_file", self.logger, config_file_yaml, pathtype="file")
+
+        print(pidfile)
 
         if pidfile is not None:
             self.logger.info("Using pidfile: %s", pidfile)
